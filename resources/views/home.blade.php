@@ -22,18 +22,22 @@
                 <div class="panel-heading">Chat Message Module</div>
 
                 <div class="panel-body">
- 
+                
                 <div class="row">
-                    <div class="col-lg-8" >
+                    <div class="col-sm-12" >
                       <div id="messages" ></div>
                     </div>
-                    <div class="col-lg-8" >
-                            <form action="sendmessage" method="POST">
+                    <div class="col-sm-12" >
+                            <form id="sendmessage" action="sendmessage" method="POST">
                                 <input type="hidden" name="_token" value="{{ csrf_token() }}" >
                                 <input type="hidden" name="user" value="{{ Auth::user()->name }}" >
-                                <textarea class="form-control msg"></textarea>
-                                <br/>
-                                <input type="button" value="Send" class="btn btn-success send-msg">
+                                <div class="input-group input-group-lg">
+                                    <input type="text" class="form-control msg" />
+                                    <span class="input-group-btn">
+                                        <input type="submit" value="Send" class="btn btn-success send-msg">
+                                    </span>
+                                    
+                                </div>
                             </form>
                     </div>
                 </div>
@@ -45,7 +49,17 @@
 </div>
 
 <script>
-    var socket = io.connect('http://localhost:8890');
+
+    var user =  '{!!Auth::user()->name!!}';
+    var socketConnect = function(room) {
+      return io.connect('http://127.0.0.1:8890', { query: "channel=" + room +"&usuario=" + user
+       });
+    };
+    
+    //var socket = io.connect('http://127.0.0.1:8890');
+    
+    //Pode ser qualquer identificador
+    var socket = socketConnect('teste');
 
     socket.on('message', function (data) {
         data = jQuery.parseJSON(data);
@@ -53,7 +67,8 @@
         $( "#messages" ).append( "<strong>"+data.user+":</strong><p>"+data.message+"</p>" );
       });
 
-    $(".send-msg").click(function(e){
+    //$(".send-msg").click(function(e){
+    $('#sendmessage').submit(function(e){
         e.preventDefault();
         var token = $("input[name='_token']").val();
         var user = $("input[name='user']").val();
@@ -73,6 +88,8 @@
         }else{
             alert("Please Add Message.");
         }
-    })
+        return false;
+    });
+  
 </script>
 @endsection
